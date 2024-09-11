@@ -68,10 +68,23 @@
       showAlert("error", err.response.data.message);
     }
   };
+  var logout = async () => {
+    try {
+      const res = await axios({
+        method: "GET",
+        url: "http://localhost:3000/api/v1/users/logout"
+      });
+      if (res.data.status = "success") location.reload(true);
+    } catch (err) {
+      console.log(err.response);
+      showAlert("error", "Error logging out, try again");
+    }
+  };
 
   // public/js/index.js
   var mapBox = document.getElementById("map");
   var loginForm = document.querySelector(".form");
+  var logOutBtn = document.querySelector(".nav__el--logout");
   if (mapBox) {
     const locations = JSON.parse(mapBox.dataset.locations);
     displayMap(locations);
@@ -83,4 +96,5 @@
       const password = document.getElementById("password").value;
       login(email, password);
     });
+  if (logOutBtn) logOutBtn.addEventListener("click", logout);
 })();

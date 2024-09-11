@@ -65,6 +65,15 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+// basically replacing real jwt with a "fake" one that expires quick to "log out"
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) getting token and check if it's there
   let token;
@@ -108,33 +117,38 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 // only for rendered pages, no errors
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
+// replaced catchAsync with try block, to dummy logout token doesn't fail jwt verify and get passed to global error handler and crash everything
+exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
-    //1 verify token
-    const decoded = await promisify(jwt.verify)(
-      req.cookies.jwt,
-      process.env.JWT_SECRET,
-    );
-    // console.log(decoded);
+    try {
+      //1 verify token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET,
+      );
+      // console.log(decoded);
 
-    // 3) check if user still exists
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
+      // 3) check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+
+      // 4) check if user changed password after the token was issued
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+      // there is a logged in user
+      // every pug as access to locals, anything there will be an accessible variable inside template
+      res.locals.user = currentUser;
+      // return makes sure next is only called once, instead of in here then outside right after
+      return next();
+    } catch (err) {
       return next();
     }
-
-    // 4) check if user changed password after the token was issued
-    if (currentUser.changedPasswordAfter(decoded.iat)) {
-      return next();
-    }
-    // there is a logged in user
-    // every pug as access to locals, anything there will be an accessible variable inside template
-    res.locals.user = currentUser;
-    // return makes sure next is only called once, instead of in here then outside right after
-    return next();
   }
   next();
-});
+};
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
