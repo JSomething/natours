@@ -2,17 +2,21 @@
   "name": "natours",
   "version": "1.0.0",
   "description": "learning node, express, and mongoDB",
-  "main": "app.js",
+  "main": "./public/js/bundle.js",
   "scripts": {
     "start:dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
-    "debug": "ndb server.js"
+    "debug": "ndb server.js",
+    "watch:js": "esbuild ./public/js/index.js --bundle --outfile=./public/js/bundle.js --watch",
+    "build:js": "esbuild ./public/js/index.js --bundle --doutfile=./public/js/bundle.js "
   },
   "author": "Jsomething",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
+    "esbuild": "0.23.1",
     "express": "^4.19.2",
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.3.1",

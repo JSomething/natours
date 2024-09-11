@@ -23,6 +23,8 @@ const router = express.Router();
 //   next();
 // });
 
+router.use(authController.isLoggedIn);
+
 router.get('/', viewsController.getOverview);
 router.get('/tour/:slug', viewsController.getTour);
 
