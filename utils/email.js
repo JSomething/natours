@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const pug = require('pug');
+const Transport = require('nodemailer-brevo-transport');
 const htmlToText = require('html-to-text');
 
 module.exports = class Email {
@@ -10,10 +11,18 @@ module.exports = class Email {
     this.from = `JSomething <${process.env.EMAIL_FROM}>`;
   }
 
+  // brevo prod mode
   newTransport() {
-    if (process.env.NODE_ENV === 'production') {
-      // Sendgrid
-      return 1;
+    if (process.env.NODE_ENV.trim() === 'production') {
+      return nodemailer.createTransport({
+        host: process.env.BREVO_HOST,
+        port: process.env.BREVO_PORT,
+        secure: false,
+        auth: {
+          user: process.env.BREVO_LOGIN,
+          pass: process.env.BREVO_PASSWORD,
+        },
+      });
     }
 
     return nodemailer.createTransport({
