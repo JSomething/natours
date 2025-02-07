@@ -27,15 +27,36 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // security http headers
 
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'", 'ws:'],
+        connectSrc: [
+          "'self'",
+          'http://127.0.0.1:3000/',
+          'http://localhost:3000',
+          'https://api.stripe.com/',
+          'ws://127.0.0.1:1234', // Add this line to allow WebSocket connections
+          'https://*',
+        ],
+        scriptSrc: [
+          "'self'",
+          'https://cdnjs.cloudflare.com/',
+          'https://api.mapbox.com/',
+          'https://js.stripe.com/',
+          'blob:',
+        ],
+        frameSrc: ["'self'", 'https://js.stripe.com/'],
 
-// app.use(helmet());
+        styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:'],
+        fontSrc: ["'self'", 'https:', 'data:'],
+      },
+    },
+  }),
+);
 
-// app.use(
-//   cors({
-//     origin: '*',
-//   }),
-// );
 //middleware that modifies incoming REQUEST data
 //logging
 console.log(process.env.NODE_ENV);

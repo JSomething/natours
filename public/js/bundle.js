@@ -2617,12 +2617,29 @@
     }
   };
 
+  // public/js/stripe.js
+  var bookTour = async (tourId) => {
+    const stripe = Stripe(
+      "pk_test_51Qoz8xDiPd9KqP2LsogY9pEGFUuA2CUWSFRbUETICokn9khYhISiifXrUMdgp13A6diYGJhQjOra6vYFSN54Nm8D00CtAK1Crj"
+    );
+    try {
+      const session = await axios_default(
+        `http://localhost:3000/api/v1/bookings/checkout-session/${tourId}`
+      );
+      if (session.status === 200) location.assign(session.data.session.url);
+      console.log(session.data.session.url);
+    } catch (err) {
+      showAlert("error", err.response.data.message);
+    }
+  };
+
   // public/js/index.js
   var mapBox = document.getElementById("map");
   var loginForm = document.querySelector(".form--login");
   var logOutBtn = document.querySelector(".nav__el--logout");
   var userDataForm = document.querySelector(".form-user-data");
   var userPasswordForm = document.querySelector(".form-user-password");
+  var bookBtn = document.getElementById("book-tour");
   if (mapBox) {
     const locations = JSON.parse(mapBox.dataset.locations);
     displayMap(locations);
@@ -2658,5 +2675,12 @@
       );
       document.querySelector(".btn--save-password").textContent = "Save Password";
       userPasswordForm.reset();
+    });
+  if (bookBtn)
+    bookBtn.addEventListener("click", (e) => {
+      e.target.textContent = "Processing...";
+      const { tourId } = e.target.dataset;
+      console.log(tourId);
+      bookTour(tourId);
     });
 })();
