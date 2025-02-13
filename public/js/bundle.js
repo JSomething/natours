@@ -2627,7 +2627,6 @@
         `http://localhost:3000/api/v1/bookings/checkout-session/${tourId}`
       );
       if (session.status === 200) location.assign(session.data.session.url);
-      console.log(session.data.session.url);
     } catch (err) {
       showAlert("error", err.response.data.message);
     }
